@@ -22,40 +22,35 @@ int main() {
 void make_picture(int **picture, int n, int m) {
     int frame_w[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
     int frame_h[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-    int tree_trunk[] = { 4, 4, 4, 4 };
+    int tree_trunk[] = { 7, 7, 7, 7 };
     int tree_foliage[] = { 3, 3, 3, 3 };
-    int sun_data[6][5] = { { 0, 2, 2, 2, 2 }, 
-                           { 0, 0, 2, 2, 2 }, 
-                           { 0, 0, 2, 2, 2 },
-                           { 0, 2, 0, 0, 2 },
+    int sun_data[6][5] = { { 0, 6, 6, 6, 6 }, 
+                           { 0, 0, 6, 6, 6 }, 
+                           { 0, 0, 6, 6, 6 },
+                           { 0, 6, 0, 0, 6 },
                            { 0, 0, 0, 0, 0 },
                            { 0, 0, 0, 0, 0 } };
 
     reset_picture(picture, n, m);
 
-    // 1. Отрисовка верхней и нижней рамки (frame_w)
     for (int j = 0; j < m; j++) {
         picture[0][j] = frame_w[j];
         picture[n - 1][j] = frame_w[j];
     }
 
-    // 2. Отрисовка левой и правой боковой рамки (frame_h)
     for (int i = 0; i < n; i++) {
         picture[i][0] = frame_h[i];
         picture[i][m - 1] = frame_h[i];
     }
 
-    // 3. Отрисовка рамки посредине (горизонтальная линия на 7-й строке)
     for (int j = 0; j < m; j++) {
         picture[7][j] = frame_w[j];
     }
 
-    // 4. Отрисовка вертикальной рамки посредине (на 6-м столбце)
     for (int i = 0; i < n; i++) {
         picture[i][6] = frame_h[i];
     }
 
-    // 5. Отрисовка солнца (sun_data) в верхнем правом квадранте (строки 1-5, столбцы 7-11)
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 5; j++) {
             if (sun_data[i][j] != 0) {
@@ -64,23 +59,28 @@ void make_picture(int **picture, int n, int m) {
         }
     }
 
-    // 6. Отрисовка кроны дерева (tree_foliage) — строки 2, 3, 4, 5
+    picture[2][3] = tree_foliage[0];
+    picture[2][4] = tree_foliage[1];
+
     for (int j = 2; j <= 5; j++) {
-        picture[2][j] = tree_foliage[j - 2];
         picture[3][j] = tree_foliage[j - 2];
         picture[4][j] = tree_foliage[j - 2];
-        picture[5][j] = tree_foliage[j - 2];
     }
 
-    // 7. Отрисовка ствола дерева (tree_trunk) — строки 6, 8, 9, 10 на 3-м и 4-м столбцах
+    picture[5][3] = tree_foliage[0];
+    picture[5][4] = tree_foliage[1];
+
     picture[6][3] = tree_trunk[0];
     picture[6][4] = tree_trunk[1];
     picture[8][3] = tree_trunk[0];
     picture[8][4] = tree_trunk[1];
     picture[9][3] = tree_trunk[0];
     picture[9][4] = tree_trunk[1];
-    picture[10][3] = tree_trunk[0];
-    picture[10][4] = tree_trunk[1];
+    
+    picture[10][2] = tree_trunk[0];
+    picture[10][3] = tree_trunk[1];
+    picture[10][4] = tree_trunk[2];
+    picture[10][5] = tree_trunk[3];
 }
 
 void reset_picture(int **picture, int n, int m) {
