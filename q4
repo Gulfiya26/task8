@@ -78,7 +78,6 @@ int main(void) {
     }
 
     if (input_matrix(matrix, rows, cols) == 0) {
-        // Выделяем статические массивы под результаты (макс. размер 100 по ТЗ)
         int rows_max[ST_MAX];
         int cols_min[ST_MAX];
 
@@ -89,7 +88,7 @@ int main(void) {
         printf("\n");
         output_array(rows_max, rows);
         printf("\n");
-        output_array(cols_min, cols); // Последняя строка вывода, без \n на конце
+        output_array(cols_min, cols);
     } else {
         printf("n/a");
     }
@@ -138,7 +137,6 @@ void output_matrix(int **matrix, int rows, int cols) {
     }
 }
 
-// Поиск максимального элемента в каждой строке
 void find_rows_max(int **matrix, int rows, int cols, int *res) {
     for (int i = 0; i < rows; i++) {
         int max = matrix[i][0];
@@ -151,7 +149,6 @@ void find_rows_max(int **matrix, int rows, int cols, int *res) {
     }
 }
 
-// Поиск минимального элемента в каждом столбце
 void find_cols_min(int **matrix, int rows, int cols, int *res) {
     for (int j = 0; j < cols; j++) {
         int min = matrix[0][j];
@@ -164,7 +161,6 @@ void find_cols_min(int **matrix, int rows, int cols, int *res) {
     }
 }
 
-// Универсальный вывод одномерного массива через пробел без \n на конце
 void output_array(const int *arr, int len) {
     for (int i = 0; i < len; i++) {
         printf("%d%s", *(arr + i), (i < len - 1) ? " " : "");
