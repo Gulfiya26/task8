@@ -1,0 +1,144 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define EPS 1e-9
+
+int input_dimensions(int *rows, int *cols);
+double **allocate_matrix(int rows, int cols, double **data_ptr);
+int input_matrix(double **matrix, int rows, int cols);
+void output_matrix(double **matrix, int rows, int cols);
+void free_matrix(double **matrix, double *data);
+int invert(double **matrix, int n, double **result);
+
+int main(void) {
+    int n, m;
+    if (input_dimensions(&n, &m) != 0 || n != m) {
+        printf("n/a");
+        return 0;
+    }
+
+    double **matrix = NULL, **res_matrix = NULL;
+    double *data = NULL, *res_data = NULL;
+
+    matrix = allocate_matrix(n, m, &data);
+    res_matrix = allocate_matrix(n, m, &res_data);
+
+    if (matrix == NULL || res_matrix == NULL) {
+        printf("n/a");
+        free_matrix(matrix, data);
+        free_matrix(res_matrix, res_data);
+        return 0;
+    }
+
+    if (input_matrix(matrix, n, m) != 0 || invert(matrix, n, res_matrix) != 0) {
+        printf("n/a");
+    } else {
+        output_matrix(res_matrix, n, m);
+    }
+
+    free_matrix(matrix, data);
+    free_matrix(res_matrix, res_data);
+    return 0;
+}
+
+int input_dimensions(int *rows, int *cols) {
+    if (scanf("%d %d", rows, cols) != 2 || *rows <= 0 || *cols <= 0) {
+        return 1;
+    }
+    return 0;
+}
+
+double **allocate_matrix(int rows, int cols, double **data_ptr) {
+    double **matrix = (double **)malloc(rows * sizeof(double *));
+    if (matrix == NULL) return NULL;
+    *data_ptr = (double *)malloc(rows * cols * sizeof(double));
+    if (*data_ptr == NULL) {
+        free(matrix);
+        return NULL;
+    }
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = (*data_ptr) + i * cols;
+    }
+    return matrix;
+}
+
+int input_matrix(double **matrix, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (scanf("%lf", &matrix[i][j]) != 1) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+void output_matrix(double **matrix, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            double val = matrix[i][j];
+            if (fabs(val) < 1e-7) {
+                val = 0.0;
+            }
+            printf("%.6f%s", val, (j < cols - 1) ? " " : "");
+        }
+        if (i < rows - 1) {
+            printf("\n");
+        }
+    }
+}
+
+void free_matrix(double **matrix, double *data) {
+    if (data != NULL) free(data);
+    if (matrix != NULL) free(matrix);
+}
+
+int invert(double **matrix, int n, double **result) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            result[i][j] = (i == j) ? 1.0 : 0.0;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        int pivot = i;
+        for (int j = i + 1; j < n; j++) {
+            if (fabs(matrix[j][i]) > fabs(matrix[pivot][i])) {
+                pivot = j;
+            }
+        }
+
+        if (fabs(matrix[pivot][i]) < EPS) {
+            return 1;
+        }
+
+        if (pivot != i) {
+            double *temp = matrix[i];
+            matrix[i] = matrix[pivot];
+            matrix[pivot] = temp;
+
+            double *temp_res = result[i];
+            result[i] = result[pivot];
+            result[pivot] = temp_res;
+        }
+
+        double pivot_val = matrix[i][i];
+        for (int j = 0; j < n; j++) {
+            matrix[i][j] /= pivot_val;
+            result[i][j] /= pivot_val;
+        }
+
+        for (int j = 0; j < n; j++) {
+            if (j != i) {
+                double factor = matrix[j][i];
+                for (int k = 0; k < n; k++) {
+                    matrix[j][k] -= factor * matrix[i][k];
+                    result[j][k] -= factor * result[i][k];
+                }
+            }
+        }
+    }
+
+    return 0;
+}
