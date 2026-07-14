@@ -8,7 +8,8 @@ int input_menu(int *type);
 int input_matrix(int **matrix, int rows, int cols);
 void output_matrix(int **matrix, int rows, int cols);
 
-void free_matrix(int **matrix, int rows, int type);
+// Изменили прототип: теперь передаем указатели на сплошные буферы
+void free_matrix(int **matrix, int rows, int type, int *data3, int *data4);
 
 int main(void) {
     int type;
@@ -29,8 +30,8 @@ int main(void) {
     }
 
     int **matrix = NULL;
-    int static_arr[ST_MAX][ST_MAX];
-    int *static_ptrs[ST_MAX];
+    int static_arr[ST_MAX][ST_MAX] = {0}; 
+    int *static_ptrs[ST_MAX] = {NULL};   
     int *data3 = NULL;
     int *data4 = NULL;
 
@@ -48,7 +49,7 @@ int main(void) {
         for (int i = 0; i < rows; i++) {
             matrix[i] = (int *)malloc(cols * sizeof(int));
             if (matrix[i] == NULL) {
-                free_matrix(matrix, i, 2);
+                free_matrix(matrix, i, 2, data3, data4);
                 printf("n/a");
                 return 0;
             }
@@ -88,7 +89,8 @@ int main(void) {
         printf("n/a");
     }
 
-    free_matrix(matrix, rows, type);
+    // Передаем data3 и data4 для гарантированно безопасной очистки
+    free_matrix(matrix, rows, type, data3, data4);
     return 0;
 }
 
@@ -132,7 +134,7 @@ void output_matrix(int **matrix, int rows, int cols) {
     }
 }
 
-void free_matrix(int **matrix, int rows, int type) {
+void free_matrix(int **matrix, int rows, int type, int *data3, int *data4) {
     if (matrix == NULL) return;
 
     if (type == 2) {
@@ -140,11 +142,11 @@ void free_matrix(int **matrix, int rows, int type) {
             free(matrix[i]);
         }
         free(matrix);
-    } else if (type == 3 || type == 4) {
-        if (rows > 0) {
-            free(matrix[0]);
-        }
-        free(matrix);
+    } else if (type == 3) {
+        free(data3);  // Чистим буфер через оригинальный указатель
+        free(matrix); // Чистим массив указателей
+    } else if (type == 4) {
+        free(data4);  // Чистим буфер через оригинальный указатель
+        free(matrix); // Чистим массив указателей
     }
 }
-ß
