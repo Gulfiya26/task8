@@ -1,0 +1,157 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int input_operation(int *op);
+int input_dimensions(int *rows, int *cols);
+int **allocate_matrix(int rows, int cols, int **data_ptr);
+int input_matrix(int **matrix, int rows, int cols);
+void output_matrix(int **matrix, int rows, int cols);
+void free_matrix(int **matrix, int *data);
+
+int sum(int **matrix_first, int n_first, int m_first, int **matrix_second, 
+    int n_second, int m_second, int **matrix_result, int *n_result, int *m_result);
+int mul(int **matrix_first, int n_first, int m_first, int **matrix_second, 
+    int n_second, int m_second, int **matrix_result, int *n_result, int *m_result);
+int transpose_matrix(int **matrix, int n, int m, int **matrix_result, int *n_result, int *m_result);
+
+int main(void) {
+    int op;
+    if (input_operation(&op) != 0) { printf("n/a"); return 0; }
+
+    int n1, m1, n2 = 0, m2 = 0;
+    int **mat1 = NULL, **mat2 = NULL, **res = NULL;
+    int *data1 = NULL, *data2 = NULL, *data_res = NULL;
+
+    if (input_dimensions(&n1, &m1) != 0) { printf("n/a"); return 0; }
+    mat1 = allocate_matrix(n1, m1, &data1);
+    if (mat1 == NULL || input_matrix(mat1, n1, m1) != 0) {
+        printf("n/a"); free_matrix(mat1, data1); return 0;
+    }
+
+    if (op == 1 || op == 2) {
+        if (input_dimensions(&n2, &m2) != 0) {
+            printf("n/a"); free_matrix(mat1, data1); return 0;
+        }
+        mat2 = allocate_matrix(n2, m2, &data2);
+        if (mat2 == NULL || input_matrix(mat2, n2, m2) != 0) {
+            printf("n/a"); free_matrix(mat1, data1); free_matrix(mat2, data2); return 0;
+        }
+    }
+
+    int n_res = 0, m_res = 0;
+    int error = 0;
+
+    if (op == 1) {
+        res = allocate_matrix(n1, m1, &data_res);
+        if (res == NULL || sum(mat1, n1, m1, mat2, n2, m2, res, &n_res, &m_res) != 0) error = 1;
+    } else if (op == 2) {
+        res = allocate_matrix(n1, m2, &data_res);
+        if (res == NULL || mul(mat1, n1, m1, mat2, n2, m2, res, &n_res, &m_res) != 0) error = 1;
+    } else if (op == 3) {
+        res = allocate_matrix(m1, n1, &data_res);
+        if (res == NULL || transpose_matrix(mat1, n1, m1, res, &n_res, &m_res) != 0) error = 1;
+    }
+
+    if (!error && res != NULL) {
+        output_matrix(res, n_res, m_res);
+    } else {
+        printf("n/a");
+    }
+
+    free_matrix(mat1, data1);
+    free_matrix(mat2, data2);
+    free_matrix(res, data_res);
+
+    return 0;
+}
+
+int input_operation(int *op) {
+    if (scanf("%d", op) != 1 || *op < 1 || *op > 3) return 1;
+    return 0;
+}
+
+int input_dimensions(int *rows, int *cols) {
+    if (scanf("%d %d", rows, cols) != 2 || *rows <= 0 || *cols <= 0) return 1;
+    return 0;
+}
+
+int **allocate_matrix(int rows, int cols, int **data_ptr) {
+    int **matrix = (int **)malloc(rows * sizeof(int *));
+    if (matrix == NULL) return NULL;
+    *data_ptr = (int *)malloc(rows * cols * sizeof(int));
+    if (*data_ptr == NULL) {
+        free(matrix);
+        return NULL;
+    }
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = (*data_ptr) + i * cols;
+    }
+    return matrix;
+}
+
+int input_matrix(int **matrix, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (scanf("%d", &matrix[i][j]) != 1) return 1;
+        }
+    }
+    return 0;
+}
+
+void output_matrix(int **matrix, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%d%s", matrix[i][j], (j < cols - 1) ? " " : "");
+        }
+        if (i < rows - 1) printf("\n");
+    }
+}
+
+void free_matrix(int **matrix, int *data) {
+    if (data != NULL) free(data);
+    if (matrix != NULL) free(matrix);
+}
+
+int sum(int **matrix_first, int n_first, int m_first, int **matrix_second, 
+    int n_second, int m_second, int **matrix_result, int *n_result, int *m_result) {
+    if (n_first != n_second || m_first != m_second) return 1;
+    
+    *n_result = n_first;
+    *m_result = m_first;
+
+    for (int i = 0; i < n_first; i++) {
+        for (int j = 0; j < m_first; j++) {
+            matrix_result[i][j] = matrix_first[i][j] + matrix_second[i][j];
+        }
+    }
+    return 0;
+}
+
+int mul(int **matrix_first, int n_first, int m_first, int **matrix_second, 
+    int n_second, int m_second, int **matrix_result, int *n_result, int *m_result) {
+    if (m_first != n_second) return 1;
+
+    *n_result = n_first;
+    *m_result = m_second;
+
+    for (int i = 0; i < n_first; i++) {
+        for (int j = 0; j < m_second; j++) {
+            matrix_result[i][j] = 0;
+            for (int k = 0; k < m_first; k++) {
+                matrix_result[i][j] += matrix_first[i][k] * matrix_second[k][j];
+            }
+        }
+    }
+    return 0;
+}
+
+int transpose_matrix(int **matrix, int n, int m, int **matrix_result, int *n_result, int *m_result) {
+    *n_result = m;
+    *m_result = n;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            matrix_result[j][i] = matrix[i][j];
+        }
+    }
+    return 0;
+}
